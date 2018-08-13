@@ -75,7 +75,7 @@ function readByCondition(req, res) {
 
 /**
  * @author Girijashankar Mishra
- * @description Read Data from MongoDB using condition
+ * @description Update Data in MongoDB using condition
  * @param {dbName,collectionName,jsonData,condition} req 
  * @param {JSONObject} res 
  */
@@ -104,19 +104,18 @@ function updateData(req, res) {
  * @param {dbName,collectionName,jsonData,condition} req 
  * @param {JSONObject} res 
  */
-function update(req, res) {
+function deleteData(req, res) {
     var deferred = Q.defer();
     var dbName = req.body.dbName;
     var collectionName = req.body.collectionName;
-    var jsonData = req.body.jsonData;
     var condition = req.body.condition;
     var db = mongo.db(config.connectionString + dbName, {
         native_parser: true
     });
     db.bind(collectionName);
-    db.collectionName.update(condition, {$set:jsonData}, function(err, result) {
+    db.collectionName.remove(condition,  function(err, result) {
         if (err) deferred.reject(err.name + ': ' + err.message);
-        console.log("update result =", result);
+        console.log("delete result =", result);
         deferred.promise(result);
     });
     db.close();
