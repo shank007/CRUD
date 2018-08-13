@@ -1,0 +1,11 @@
+{
+  "name": "crud",
+  "version": "0.0.1",
+  "description": "A microservice that can be used by other applications to perform all CRUD operations for MongoDB.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Girijashankar Mishra",
+  "license": "MIT"
+}
