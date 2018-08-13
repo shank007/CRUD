@@ -5,7 +5,6 @@
  */
 var express = require('express');
 var router = express.Router();
-var Q = require('q');
 var config = require('../config.json');
 var mongo = require('mongoskin');
 
@@ -26,7 +25,6 @@ module.exports = router;
  * @param {JSONObject} res 
  */
 function create(req, res) {
-    var deferred = Q.defer();
     var dbName = req.body.dbName;
     var collectionName = req.body.collectionName;
     var jsonData = req.body.jsonData;
@@ -34,19 +32,23 @@ function create(req, res) {
         native_parser: true
     });
     db.bind(collectionName);
-    db.collectionName.insert(
+
+    db.collection(collectionName).insert(
         jsonData,
-        function (err, result) {
-            if (err) deferred.reject(err.name + ': ' + err.message);
+        function (errs, result) {
+            var result = {};
+            if (errs) {
+                res.send(errs);
+            }
 
             console.log("doc created =", result);
-            deferred.promise(result);
+            result["status"] = "200";
+            result["message"] = "Data Stored in DB";
+            res.send(result);
         });
+
     db.close();
-    return deferred.promise;
 }
-
-
 
 /**
  * @author Girijashankar Mishra
@@ -55,22 +57,26 @@ function create(req, res) {
  * @param {JSONObject} res 
  */
 function readByCondition(req, res) {
-    var deferred = Q.defer();
-    var dbName = req.body.dbName;
-    var collectionName = req.body.collectionName;
-    var condition = req.body.condition;
+    var dbName = req.query.dbName;
+    var collectionName = req.query.collectionName;
+    var condition = req.query.condition;
     var db = mongo.db(config.connectionString + dbName, {
         native_parser: true
     });
     db.bind(collectionName);
-    db.collectionName.find(condition).toArray(function (err, result) {
-        if (err) deferred.reject(err.name + ': ' + err.message);
+    console.log(dbName);
+    console.log(collectionName);
+    console.log(JSON.parse(JSON.stringify(condition)));
 
-        console.log("read result =", result);
-        deferred.promise(result);
+    db.collection(collectionName).find(JSON.stringify(condition)).toArray(function (errs, result) {
+        console.error('errs == ' + errs)
+        if (errs) {
+            res.send(errs);
+        }
+        console.log('read result = ', result);
+        res.send(result);
     });
     db.close();
-    return deferred.promise;
 }
 
 /**
@@ -80,7 +86,6 @@ function readByCondition(req, res) {
  * @param {JSONObject} res 
  */
 function updateData(req, res) {
-    var deferred = Q.defer();
     var dbName = req.body.dbName;
     var collectionName = req.body.collectionName;
     var jsonData = req.body.jsonData;
@@ -89,13 +94,20 @@ function updateData(req, res) {
         native_parser: true
     });
     db.bind(collectionName);
-    db.collectionName.update(condition, {$set:jsonData}, function(err, result) {
-        if (err) deferred.reject(err.name + ': ' + err.message);
-        console.log("update result =", result);
-        deferred.promise(result);
+    db.collection(collectionName).update(condition, {
+        $set: jsonData
+    }, function (err, result) {
+        var result = {};
+        if (err) {
+            res.send(err);
+        }
+
+        console.log("doc created =", result);
+        result["status"] = "200";
+        result["message"] = "Data Updated in DB";
+        res.send(result);
     });
     db.close();
-    return deferred.promise;
 }
 
 /**
@@ -105,7 +117,6 @@ function updateData(req, res) {
  * @param {JSONObject} res 
  */
 function deleteData(req, res) {
-    var deferred = Q.defer();
     var dbName = req.body.dbName;
     var collectionName = req.body.collectionName;
     var condition = req.body.condition;
@@ -113,11 +124,16 @@ function deleteData(req, res) {
         native_parser: true
     });
     db.bind(collectionName);
-    db.collectionName.remove(condition,  function(err, result) {
-        if (err) deferred.reject(err.name + ': ' + err.message);
-        console.log("delete result =", result);
-        deferred.promise(result);
+    db.collection(collectionName).remove(condition, function (err, result) {
+        var result = {};
+        if (err) {
+            res.send(err);
+        }
+
+        console.log("doc created =", result);
+        result["status"] = "200";
+        result["message"] = "Data Deleted from DB";
+        res.send(result);
     });
     db.close();
-    return deferred.promise;
 }
