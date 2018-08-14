@@ -4,7 +4,7 @@
   "description": "A microservice that can be used by other applications to perform all CRUD operations for MongoDB.",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -13,6 +13,7 @@
   "author": "Girijashankar Mishra",
   "license": "MIT",
   "dependencies": {
+    "chai": "^4.1.2",
     "cookie-parser": "^1.4.3",
     "cors": "^2.8.4",
     "express": "^4.16.3",
@@ -21,5 +22,8 @@
     "mongodb": "^2.0",
     "mongoskin": "^2.0.3",
     "q": "^1.5.1"
+  },
+  "devDependencies": {
+    "mocha": "^5.2.0"
   }
 }

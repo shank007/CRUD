@@ -9,7 +9,7 @@ var config = require('../config.json');
 var mongo = require('mongoskin');
 
 router.post('/create', create);
-// router.get('/readById', readById);
+router.get('/readById', readById);
 router.get('/readByCondition', readByCondition);
 
 router.put('/update', updateData);
@@ -50,6 +50,37 @@ function create(req, res) {
     db.close();
 }
 
+
+/**
+ * @author Girijashankar Mishra
+ * @description Read Data from MongoDB using condition
+ * @param {dbName,collectionName,condition} req 
+ * @param {JSONObject} res 
+ */
+function readById(req, res) {
+    var dbName = req.query.dbName;
+    var collectionName = req.query.collectionName;
+    var id = req.query.id;
+    var db = mongo.db(config.connectionString + dbName, {
+        native_parser: false
+    });
+    db.bind(collectionName);
+    var o_id = new mongo.ObjectID(id);
+
+    db.collection(collectionName).find({
+        _id: o_id
+    }).toArray(function (errs, result) {
+        console.error('errs == ' + errs)
+        if (errs) {
+            res.send(errs);
+        }
+        console.log('read result = ', result);
+        res.send(result);
+    });
+    db.close();
+}
+
+
 /**
  * @author Girijashankar Mishra
  * @description Read Data from MongoDB using condition
@@ -61,19 +92,16 @@ function readByCondition(req, res) {
     var collectionName = req.query.collectionName;
     var condition = req.query.condition;
     var db = mongo.db(config.connectionString + dbName, {
-        native_parser: true
+        native_parser: false
     });
+    var queryData = JSON.parse(condition);
     db.bind(collectionName);
-    console.log(dbName);
-    console.log(collectionName);
-    console.log(JSON.parse(JSON.stringify(condition)));
-
-    db.collection(collectionName).find(JSON.stringify(condition)).toArray(function (errs, result) {
+    
+    db.collection(collectionName).find(queryData).toArray(function (errs, result) {
         console.error('errs == ' + errs)
         if (errs) {
             res.send(errs);
         }
-        console.log('read result = ', result);
         res.send(result);
     });
     db.close();
